@@ -21,26 +21,32 @@ interactive-CLI agents — same OS-level requirements as any `colo deploy`, just
 
 ## Install on a new machine
 
-Clone this anywhere you like — there's nothing special about `~/projects/ColosseumCLI`, that's
-just an example path. `colo` finds its own config by walking up from wherever the executable
-itself lives (looking for `config/subjects.yaml`), so any checkout location works as long as
-`dist/` and `config/` stay together, sitting next to each other, exactly as this repo ships them.
+```bash
+curl -fsSL https://raw.githubusercontent.com/ej3muse/ColosseumCLI/main/install.sh | bash
+colo deploy
+```
+
+No path to pick, no build step. Same shape as the Claude Code / Codex CLI installers: it clones
+into a fixed, tool-owned location (`$XDG_DATA_HOME/colosseum-cli`, i.e. `~/.local/share/colosseum-cli`
+by default), symlinks `colo` onto `~/.local/bin`, and adds that to your shell's PATH if it isn't
+already there. Override the install location with `COLOSSEUM_CLI_INSTALL_DIR=/some/path` before
+running the installer if you ever need to.
+
+Prefer to manage the checkout yourself instead? Clone this repo anywhere — `colo` finds its own
+config by walking up from wherever the executable lives (looking for `config/subjects.yaml`), so
+any location works as long as `dist/` and `config/` stay together as shipped:
 
 ```bash
 git clone https://github.com/ej3muse/ColosseumCLI.git <wherever-you-want>
-mkdir -p ~/.local/bin
 ln -sf <wherever-you-want>/dist/colo ~/.local/bin/colo
-# ensure ~/.local/bin is on PATH, then:
-colo deploy
 ```
 
 ## Updating
 
-Pull the latest commit here whenever a new release lands — no rebuild step needed, the binaries
-are already built:
+Re-run the installer — it's safe to re-run, it just fast-forwards to the latest release:
 
 ```bash
-cd <wherever-you-cloned-it> && git pull
+curl -fsSL https://raw.githubusercontent.com/ej3muse/ColosseumCLI/main/install.sh | bash
 colo deploy
 ```
 
