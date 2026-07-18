@@ -21,10 +21,15 @@ interactive-CLI agents — same OS-level requirements as any `colo deploy`, just
 
 ## Install on a new machine
 
+Clone this anywhere you like — there's nothing special about `~/projects/ColosseumCLI`, that's
+just an example path. `colo` finds its own config by walking up from wherever the executable
+itself lives (looking for `config/subjects.yaml`), so any checkout location works as long as
+`dist/` and `config/` stay together, sitting next to each other, exactly as this repo ships them.
+
 ```bash
-git clone https://github.com/ej3muse/ColosseumCLI.git ~/projects/ColosseumCLI
+git clone https://github.com/ej3muse/ColosseumCLI.git <wherever-you-want>
 mkdir -p ~/.local/bin
-ln -sf ~/projects/ColosseumCLI/dist/colo ~/.local/bin/colo
+ln -sf <wherever-you-want>/dist/colo ~/.local/bin/colo
 # ensure ~/.local/bin is on PATH, then:
 colo deploy
 ```
@@ -35,7 +40,7 @@ Pull the latest commit here whenever a new release lands — no rebuild step nee
 are already built:
 
 ```bash
-cd ~/projects/ColosseumCLI && git pull
+cd <wherever-you-cloned-it> && git pull
 colo deploy
 ```
 
