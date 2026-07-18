@@ -23,7 +23,6 @@ interactive-CLI agents — same OS-level requirements as any `colo deploy`, just
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ej3muse/ColosseumCLI/main/install.sh | bash
-colo deploy
 ```
 
 No path to pick, no build step. Same shape as the Claude Code / Codex CLI installers: it clones
@@ -31,6 +30,13 @@ into a fixed, tool-owned location (`$XDG_DATA_HOME/colosseum-cli`, i.e. `~/.loca
 by default), symlinks `colo` onto `~/.local/bin`, and adds that to your shell's PATH if it isn't
 already there. Override the install location with `COLOSSEUM_CLI_INSTALL_DIR=/some/path` before
 running the installer if you ever need to.
+
+**If `~/.local/bin` wasn't already on your PATH**, the installer prints a warning to that effect
+and cannot fix your *current* shell (it runs as a child of `curl | bash` — a subprocess can't
+change its parent's environment). Do exactly what it tells you: either open a new terminal, or
+run the `source ...` command it prints, **before** running `colo deploy`. Chaining `colo deploy`
+straight onto the same line as the install one-liner will silently fail with "command not found"
+the first time, on any machine where `~/.local/bin` wasn't already on PATH.
 
 Prefer to manage the checkout yourself instead? Clone this repo anywhere — `colo` finds its own
 config by walking up from wherever the executable lives (looking for `config/subjects.yaml`), so
@@ -43,7 +49,8 @@ ln -sf <wherever-you-want>/dist/colo ~/.local/bin/colo
 
 ## Updating
 
-Re-run the installer — it's safe to re-run, it just fast-forwards to the latest release:
+Re-run the installer — it's safe to re-run, it just fast-forwards to the latest release. Since
+`colo` is already on PATH from the first install, updates don't hit the new-shell issue above:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ej3muse/ColosseumCLI/main/install.sh | bash

@@ -32,6 +32,8 @@ echo "✓ colo -> $BIN_DIR/colo -> $INSTALL_DIR/dist/colo"
 
 case ":$PATH:" in
     *":$BIN_DIR:"*)
+        echo ""
+        echo "接下來執行：colo deploy"
         ;;
     *)
         SHELL_RC="$HOME/.bashrc"
@@ -41,10 +43,17 @@ case ":$PATH:" in
         if ! grep -qs "# colosseum-cli PATH" "$SHELL_RC" 2>/dev/null; then
             printf '\n# colosseum-cli PATH\nexport PATH="%s:$PATH"\n' "$BIN_DIR" >> "$SHELL_RC"
         fi
-        echo "✓ 已將 $BIN_DIR 加入 $SHELL_RC（開新終端機或執行「source $SHELL_RC」後即可直接用 colo）"
-        export PATH="$BIN_DIR:$PATH"
+        # This script runs via `curl | bash`, a *child* shell — `export PATH` here cannot reach
+        # back into the shell the user actually typed the command in, no matter how it's worded.
+        # Piping straight into `colo deploy` afterwards is exactly the trap that broke someone
+        # before this comment existed: it silently ran the still-stale-PATH parent shell's
+        # (missing) `colo`. Never soften this into an aside they can skim past.
+        echo ""
+        echo "⚠ 這一步是在子 shell 裡跑的（curl | bash），PATH 的變更不會回到你目前這個終端機。"
+        echo "  現在你目前的 shell 還是找不到 colo，必須先做以下兩者之一，再執行 colo deploy："
+        echo ""
+        echo "    source $SHELL_RC && colo deploy"
+        echo ""
+        echo "  或者：開一個新的終端機，再執行 colo deploy。"
         ;;
 esac
-
-echo ""
-echo "接下來執行：colo deploy"
