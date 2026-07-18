@@ -56,11 +56,3 @@ Re-run the installer — it's safe to re-run, it just fast-forwards to the lates
 curl -fsSL https://raw.githubusercontent.com/ej3muse/ColosseumCLI/main/install.sh | bash
 colo deploy
 ```
-
-## Releasing a new version (from the `colosseum` source repo)
-
-```bash
-cd ~/projects/colosseum/colosseum_cli
-./release_binary.sh                       # publishes + commits + pushes here
-./release_binary.sh /path/to/ColosseumCLI  # or an explicit checkout path
-```
