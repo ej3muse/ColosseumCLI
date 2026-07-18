@@ -1,0 +1,78 @@
+# config/subjects.yaml
+#
+# NATS-first subject configuration for red_agents.
+#
+# This file is consumed by:
+# - runtime/orchestrator_runtime.py
+# - messaging/bus/role_subscriber.py
+# - messaging/bus/send_task.py
+# - messaging/bus/listen_results.py
+#
+# Design:
+# - task.assigned.<agent_id> is the command channel. One worker process runs per agent_id, so
+#   which agent handles a given role for a given chat is a per-user choice
+#   (agent.user_role_profiles, resolved on the .NET side) rather than a fixed role->process
+#   mapping.
+# - task.started/progress/completed/failed/cancelled.<task_id> are per-task lifecycle channels.
+# - task.events, task.events.<agent_id>, and task.events.<task_id> are observer/debug channels.
+# - No task/result JSON files are required for transport.
+
+nats:
+  url: "nats://127.0.0.1:4222"
+
+subjects:
+  # Command channel.
+  # Orchestrator and manual tools publish task envelopes here.
+  # Each agent's worker subscribes here.
+  task_assigned: "task.assigned.{agent_id}"
+
+  # Per-task lifecycle channels.
+  # Role workers publish these.
+  # Orchestrator, send_task.py --wait, and listen_results.py subscribe to these.
+  task_started: "task.started.{task_id}"
+  task_progress: "task.progress.{task_id}"
+  task_completed: "task.completed.{task_id}"
+  task_failed: "task.failed.{task_id}"
+  task_cancelled: "task.cancelled.{task_id}"
+
+  # Observer/debug channels.
+  # These are optional fan-out event streams for dashboards, logs, and debugging.
+  task_events: "task.events"
+  task_agent_events: "task.events.{agent_id}"
+  task_id_events: "task.events.{task_id}"
+
+timeouts:
+  # Default execution timeout placed in task envelopes when no task-specific
+  # timeout is supplied.
+  default_task_seconds: 300
+
+  # Default timeout for tools that wait for task.completed/task.failed. Mirrors
+  # Colosseum.AgentBus.AgentBusOptions.ResultWaitSeconds (C# side is authoritative) — kept above
+  # Colosseum.Worker's InteractiveCliClient timeout (900s) so a real claude/codex/agy CTF-solving
+  # turn has time to finish before the orchestrator gives up on it.
+  result_wait_seconds: 1200
+
+jetstream:
+  # Current scripts use plain NATS pub/sub by default.
+  # Keep this section for future durable/ack-based worker mode.
+  enabled: false
+
+  stream:
+    name: "RED_AGENTS_TASKS"
+    subjects:
+      - "task.assigned.*"
+      - "task.started.*"
+      - "task.progress.*"
+      - "task.completed.*"
+      - "task.failed.*"
+      - "task.cancelled.*"
+      - "task.events"
+      - "task.events.*"
+
+  consumers:
+    # Suggested future durable naming pattern:
+    #   red-agents.<role>
+    durable_prefix: "red-agents"
+    ack_wait_seconds: 300
+    max_deliver: 3
+
